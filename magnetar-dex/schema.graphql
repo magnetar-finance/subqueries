@@ -1,0 +1,291 @@
+enum PoolType {
+  STABLE
+  VOLATILE
+  CONCENTRATED
+}
+
+enum LockType {
+  MANAGED
+  NORMAL
+}
+
+enum LPManagementProvider {
+  GAMMA
+  ICHI
+  STEER
+}
+
+enum VotingRewardsType {
+  FEE
+  BRIBE
+}
+
+type Statistics @entity {
+  id: ID!
+  txCount: BigInt!
+  totalPairsCreated: BigInt!
+  totalVolumeLockedUSD: Float!
+  totalVolumeLockedETH: Float!
+  totalFeesUSD: Float!
+  totalBribesUSD: Float!
+  totalTradeVolumeUSD: Float!
+  totalTradeVolumeETH: Float!
+}
+
+type Pool @entity {
+  id: ID!
+  address: String! @index
+  name: String!
+  token0: Token!
+  token1: Token!
+  reserve0: Float!
+  reserve1: Float!
+  totalSupply: Float!
+  reserveETH: Float!
+  reserveUSD: Float!
+  token0Price: Float!
+  token1Price: Float!
+  volumeToken0: Float!
+  volumeToken1: Float!
+  volumeUSD: Float!
+  volumeETH: Float!
+  txCount: BigInt!
+  createdAtTimestamp: BigInt!
+  createdAtBlockNumber: BigInt!
+  poolHourData: [PoolHourData!]! @derivedFrom(field: "pool")
+  mints: [Mint!]! @derivedFrom(field: "pool")
+  burns: [Burn!]! @derivedFrom(field: "pool")
+  swaps: [Swap!]! @derivedFrom(field: "pool")
+  poolType: PoolType!
+  gaugeFeesUSD: Float!
+  totalVotes: Float!
+  totalFeesUSD: Float!
+  totalBribesUSD: Float!
+  totalFees0: Float!
+  totalFees1: Float!
+  gaugeFees0CurrentEpoch: Float!
+  gaugeFees1CurrentEpoch: Float!
+  totalEmissions: Float!
+  totalEmissionsUSD: Float!
+  gauge: Gauge @index
+  liquidityManager: [LiquidityManager!]! @derivedFrom(field: "pool")
+  tickSpacing: BigInt
+}
+
+type User @entity {
+  id: ID!
+  address: String! @index
+  gaugePositions: [GaugePosition!]! @derivedFrom(field: "account")
+  lpPositions: [LiquidityPosition!]! @derivedFrom(field: "account")
+  lockPositions: [LockPosition!]! @derivedFrom(field: "owner")
+}
+
+type Gauge @entity {
+  id: ID!
+  address: String! @index
+  depositPool: Pool! @index
+  rewardToken: Token! @index
+  totalSupply: Float!
+  feeVotingReward: String! @index
+  bribeVotingReward: String! @index
+  rewardRate: Float!
+  fees0: Float!
+  fees1: Float!
+  isAlive: Boolean!
+  emission: Float!
+}
+
+type GaugePosition @entity {
+  id: ID!
+  gauge: Gauge! @index
+  amountDeposited: Float!
+  account: User! @index
+  creationTransaction: String!
+  creationBlock: BigInt!
+}
+
+type LiquidityPosition @entity {
+  id: ID!
+  pool: Pool! @index
+  account: User @index
+  position: Float!
+  creationBlock: BigInt!
+  creationTransaction: String!
+  clPositionTokenId: BigInt @index
+}
+
+type LockPosition @entity {
+  id: ID!
+  position: Float!
+  owner: User! @index
+  creationBlock: BigInt!
+  creationTransaction: String!
+  lockId: BigInt! @index
+  lockType: LockType!
+  permanent: Boolean!
+  lockRewardManager: String @index
+  freeRewardManager: String @index
+  unlockTime: BigInt!
+  totalVoteWeightGiven: Float!
+}
+
+type Token @entity {
+  id: ID!
+  address: String! @index
+  symbol: String!
+  name: String!
+  decimals: Int!
+  tradeVolume: Float!
+  tradeVolumeUSD: Float!
+  txCount: BigInt!
+  totalLiquidity: Float!
+  totalLiquidityETH: Float!
+  totalLiquidityUSD: Float!
+  derivedETH: Float!
+  derivedUSD: Float!
+  basePools: [Pool!]! @derivedFrom(field: "token0")
+  quotePools: [Pool!]! @derivedFrom(field: "token1")
+}
+
+type Transaction @entity {
+  id: ID!
+  hash: String! @index
+  block: BigInt!
+  timestamp: BigInt!
+  mints: [Mint!]! @derivedFrom(field: "transaction")
+  burns: [Burn!]! @derivedFrom(field: "transaction")
+  swaps: [Swap!]! @derivedFrom(field: "transaction")
+}
+
+type Mint @entity {
+  id: ID!
+  transaction: Transaction!
+  timestamp: BigInt! # need this to pull recent txns for specific token or Pool
+  pool: Pool! @index
+  to: String!
+  liquidity: Float!
+  sender: String
+  amount0: Float
+  amount1: Float
+  logIndex: BigInt
+  amountUSD: Float
+  feeTo: String
+  feeLiquidity: Float
+}
+
+type Burn @entity {
+  id: ID!
+  transaction: Transaction!
+  timestamp: BigInt! # need this to pull recent txns for specific token or Pool
+  pool: Pool! @index
+  liquidity: Float!
+  sender: String
+  amount0: Float
+  amount1: Float
+  to: String
+  logIndex: BigInt
+  amountUSD: Float
+  needsComplete: Boolean!
+  feeTo: String
+  feeLiquidity: Float
+}
+
+type Swap @entity {
+  id: ID!
+  transaction: Transaction!
+  timestamp: BigInt! # need this to pull recent txns for specific token or Pool
+  pool: Pool! @index
+  sender: String!
+  from: String! # the EOA that initiated the txn
+  amount0In: Float!
+  amount1In: Float!
+  amount0Out: Float!
+  amount1Out: Float!
+  to: String!
+  logIndex: BigInt
+  amountUSD: Float!
+}
+
+type Bundle @entity {
+  id: ID!
+  ethPrice: Float! # price of ETH usd
+}
+
+type OverallDayData @entity {
+  id: ID!
+  date: Int! @index
+  volumeETH: Float!
+  volumeUSD: Float!
+  liquidityETH: Float!
+  liquidityUSD: Float!
+  txCount: BigInt!
+  feesUSD: Float!
+  totalTradeVolumeETH: Float!
+  totalTradeVolumeUSD: Float!
+}
+
+type PoolHourData @entity {
+  id: ID!
+  hourStartUnix: Int!
+  pool: Pool! @index
+  reserve0: Float!
+  reserve1: Float!
+  totalSupply: Float!
+  reserveUSD: Float!
+  reserveETH: Float!
+  hourlyVolumeToken0: Float!
+  hourlyVolumeToken1: Float!
+  hourlyVolumeUSD: Float!
+  hourlyVolumeETH: Float!
+  hourlyTxns: BigInt!
+}
+
+type PoolDayData @entity {
+  id: ID!
+  date: Int!
+  pool: Pool! @index
+  reserve0: Float!
+  reserve1: Float!
+  totalSupply: Float!
+  reserveUSD: Float!
+  reserveETH: Float!
+  dailyVolumeToken0: Float!
+  dailyVolumeToken1: Float!
+  dailyVolumeUSD: Float!
+  dailyVolumeETH: Float!
+  dailyTxns: BigInt!
+}
+
+type TokenDayData @entity {
+  id: ID!
+  date: Int!
+  token: Token! @index
+  dailyVolumeToken: Float!
+  dailyVolumeETH: Float!
+  dailyVolumeUSD: Float!
+  dailyTxns: BigInt!
+  totalLiquidityToken: Float!
+  totalLiquidityETH: Float!
+  totalLiquidityUSD: Float!
+  priceUSD: Float!
+  priceETH: Float!
+}
+
+type LiquidityManager @entity {
+  id: ID!
+  address: String! @index
+  name: String!
+  provider: LPManagementProvider! @index
+  pool: Pool! @index
+}
+
+type CLPosition @entity {
+  id: ID!
+  pool: Pool! @index
+}
+
+type VotingRewards @entity {
+  id: ID!
+  gauge: Gauge! @index
+  votingRewardsType: VotingRewardsType!
+}

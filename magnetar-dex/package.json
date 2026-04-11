@@ -1,0 +1,39 @@
+{
+  "name": "magnetar-dex",
+  "version": "0.0.1",
+  "description": "This project can be use as a starting point for developing your new Ethereum SubQuery project",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "subql codegen && subql build",
+    "codegen": "subql codegen",
+    "start:docker": "docker-compose pull && docker-compose up --remove-orphans",
+    "dev": "subql codegen && subql build && docker-compose pull && docker-compose up --remove-orphans",
+    "prepack": "rm -rf dist && npm run build",
+    "test": "subql build && subql-node-ethereum test",
+    "build:develop": "NODE_ENV=develop subql codegen && NODE_ENV=develop subql build"
+  },
+  "homepage": "https://github.com/subquery/ethereum-subql-starter",
+  "repository": "github:subquery/ethereum-subql-starter",
+  "files": [
+    "dist",
+    "schema.graphql",
+    "project.yaml"
+  ],
+  "author": "Kingsley Victor",
+  "license": "MIT",
+  "dependencies": {
+    "@subql/types-core": "^2.2.0",
+    "@subql/types-ethereum": "latest",
+    "assert": "^2.0.0"
+  },
+  "devDependencies": {
+    "@subql/cli": "latest",
+    "@subql/common-ethereum": "^4.10.1",
+    "@subql/node-ethereum": "latest",
+    "@subql/testing": "latest",
+    "dotenv": "latest",
+    "ethers": "^5.7.2",
+    "tslib": "^2.8.1",
+    "typescript": "latest"
+  }
+}
