@@ -69,7 +69,7 @@ type Pool @entity {
   totalEmissionsUSD: Float!
   gauge: Gauge @index
   liquidityManager: [LiquidityManager!]! @derivedFrom(field: "pool")
-  tickSpacing: BigInt
+  tickSpacing: Int
 }
 
 type User @entity {
@@ -167,7 +167,7 @@ type Mint @entity {
   sender: String
   amount0: Float
   amount1: Float
-  logIndex: BigInt
+  logIndex: Int
   amountUSD: Float
   feeTo: String
   feeLiquidity: Float
@@ -183,7 +183,7 @@ type Burn @entity {
   amount0: Float
   amount1: Float
   to: String
-  logIndex: BigInt
+  logIndex: Int
   amountUSD: Float
   needsComplete: Boolean!
   feeTo: String
@@ -202,7 +202,7 @@ type Swap @entity {
   amount0Out: Float!
   amount1Out: Float!
   to: String!
-  logIndex: BigInt
+  logIndex: Int
   amountUSD: Float!
 }
 

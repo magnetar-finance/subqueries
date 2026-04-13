@@ -22,6 +22,8 @@
   "author": "Kingsley Victor",
   "license": "MIT",
   "dependencies": {
+    "@ethersproject/abi": "^5.8.0",
+    "@ethersproject/providers": "^5.8.0",
     "@subql/types-core": "^2.2.0",
     "@subql/types-ethereum": "latest",
     "assert": "^2.0.0"

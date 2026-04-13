@@ -74,6 +74,30 @@ const project: EthereumProject = {
         ],
       },
     },
+    {
+      kind: EthereumDatasourceKind.Runtime,
+      startBlock: 10349865,
+      options: {
+        abi: 'v3-pool-factory',
+        address: '0xB15716c7404BceFaDbd211b04F10bCbD9F93f6Dc',
+      },
+      assets: new Map([
+        ['v3-pool-factory', { file: './abis/v3-pool-factory.abi.json' }],
+        ['erc20', { file: './abis/erc20.abi.json' }],
+      ]),
+      mapping: {
+        file: './dist/index.js',
+        handlers: [
+          {
+            handler: 'handleV3PoolCreated',
+            kind: EthereumHandlerKind.Event,
+            filter: {
+              topics: ['PoolCreated(address,address,int24,address)'],
+            },
+          },
+        ],
+      },
+    },
   ],
   templates: [
     {
@@ -85,6 +109,7 @@ const project: EthereumProject = {
       assets: new Map([
         ['v2-pool', { file: './abis/v2-pool.abi.json' }],
         ['erc20', { file: './abis/erc20.abi.json' }],
+        ['oracle', { file: './abis/oracle.abi.json' }],
       ]),
       mapping: {
         file: './dist/index.js',
@@ -94,6 +119,58 @@ const project: EthereumProject = {
             kind: EthereumHandlerKind.Event,
             filter: {
               topics: ['Mint(address,uint256,uint256)'],
+            },
+          },
+          {
+            handler: 'handleV2Swap',
+            kind: EthereumHandlerKind.Event,
+            filter: {
+              topics: ['Swap(address,address,uint256,uint256,uint256,uint256)'],
+            },
+          },
+          {
+            handler: 'handleSync',
+            kind: EthereumHandlerKind.Event,
+            filter: {
+              topics: ['Sync(uint256,uint256)'],
+            },
+          },
+          {
+            handler: 'handleV2Burn',
+            kind: EthereumHandlerKind.Event,
+            filter: {
+              topics: ['Burn(address,address,uint256,uint256)'],
+            },
+          },
+          {
+            handler: 'handleFees',
+            kind: EthereumHandlerKind.Event,
+            filter: {
+              topics: ['Fees(address,uint256,uint256)'],
+            },
+          },
+        ],
+      },
+    },
+    {
+      kind: EthereumDatasourceKind.Runtime,
+      name: 'V3Pool',
+      options: {
+        abi: 'v3-pool',
+      },
+      assets: new Map([
+        ['v3-pool', { file: './abis/v3-pool.abi.json' }],
+        ['erc20', { file: './abis/erc20.abi.json' }],
+        ['oracle', { file: './abis/oracle.abi.json' }],
+      ]),
+      mapping: {
+        file: './dist/index.js',
+        handlers: [
+          {
+            handler: 'handleV3Mint',
+            kind: EthereumHandlerKind.Event,
+            filter: {
+              topics: ['Mint(address,address,int24,int24,uint128,uint256,uint256)'],
             },
           },
         ],
