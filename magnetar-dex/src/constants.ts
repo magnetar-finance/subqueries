@@ -7,3 +7,5 @@ export const ONE_BI = BigInt(1);
 export const ORACLES: Record<string, string> = {
   5124: '0x6202Fc26DF15bb3010df625e8874E8B55C42b46f',
 };
+
+export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
