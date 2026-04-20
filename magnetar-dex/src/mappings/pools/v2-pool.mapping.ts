@@ -1,15 +1,24 @@
 import assert from 'assert';
-import { Mint, Pool, Statistics, Swap, Token, Transaction } from '../../types';
-import { MintLog, SwapLog, SyncLog } from '../../types/abi-interfaces/V2PoolAbi';
+import { Burn, Mint, Pool, Statistics, Swap, Token, Transaction } from '../../types';
 import {
+  BurnLog,
+  FeesLog,
+  MintLog,
+  SwapLog,
+  SyncLog,
+  TransferLog,
+} from '../../types/abi-interfaces/V2PoolAbi';
+import {
+  createLPPosition,
   divideByBase,
+  getERC20Balance,
   getTokenPrice,
   updateOverallDayData,
   updatePoolDayData,
   updatePoolHourData,
   updateTokenDayData,
 } from '../../utils';
-import { ONE_BI, ZERO_ADDRESS, ZERO_BI, ZERO_NUM } from '../../constants';
+import { ONE_ADDRESS, ONE_BI, ZERO_ADDRESS, ZERO_NUM } from '../../constants';
 
 export async function handleV2Swap(log: SwapLog): Promise<void> {
   const poolId = log.address;
@@ -193,19 +202,14 @@ export async function handleV2Mint(log: MintLog) {
   }
 
   const mintId = transaction.id + '-' + log.logIndex;
-  const mint = Mint.create({
-    id: mintId,
-    amount0,
-    amount1,
-    amountUSD: amount0USD + amount1USD,
-    sender: params.sender,
-    logIndex: log.logIndex,
-    timestamp: ZERO_BI,
-    transactionId: transaction.id,
-    poolId: pool.id,
-    to: ZERO_ADDRESS,
-    liquidity: ZERO_NUM,
-  });
+  const mint = await Mint.get(mintId);
+  assert(mint, '!Mint');
+
+  mint.amount0 = amount0;
+  mint.amount1 = amount1;
+  mint.amountUSD = amount0USD + amount1USD;
+  mint.sender = params.sender;
+  mint.logIndex = log.logIndex;
 
   await mint.save();
 
@@ -294,4 +298,204 @@ export async function handleSync(log: SyncLog) {
   token1.totalLiquidityUSD = token1.totalLiquidity * token1.derivedUSD;
 
   await Promise.all([pool.save(), statistics.save(), token0.save(), token1.save()]);
+}
+
+export async function handleV2Burn(log: BurnLog) {
+  const pool = await Pool.get(log.address);
+  assert(pool, '!Pool');
+
+  const token0 = await Token.get(pool.token0Id);
+  const token1 = await Token.get(pool.token1Id);
+  const statistics = await Statistics.get('1');
+
+  assert(token0 && token1 && statistics, '!Token0 || !Token1 || !Statistics');
+
+  const params = log.args;
+
+  assert(params, '!Params');
+
+  const token0Amount = divideByBase(params.amount0.toBigInt(), token0.decimals);
+  const token1Amount = divideByBase(params.amount1.toBigInt(), token1.decimals);
+
+  token0.txCount = token0.txCount + ONE_BI;
+  token1.txCount = token1.txCount + ONE_BI;
+
+  const amountTotalUSD = token0Amount * token0.derivedUSD + token1Amount * token1.derivedUSD;
+  statistics.txCount = statistics.txCount + ONE_BI;
+  pool.txCount = pool.txCount + ONE_BI;
+
+  await Promise.all([token0.save(), token1.save(), statistics.save(), pool.save()]);
+
+  // Transaction
+  const hash = log.transactionHash;
+  let transaction = await Transaction.get(hash);
+
+  if (!transaction) {
+    transaction = Transaction.create({
+      id: hash,
+      block: BigInt(log.blockNumber),
+      timestamp: log.block.timestamp,
+      hash,
+    });
+    await transaction.save();
+  }
+
+  const burnId = transaction.id + '-' + log.logIndex;
+  const burn = Burn.create({
+    id: burnId,
+    logIndex: log.logIndex,
+    amount0: token0Amount,
+    amount1: token1Amount,
+    amountUSD: amountTotalUSD,
+    sender: params.sender,
+    transactionId: transaction.id,
+    needsComplete: false,
+    poolId: pool.id,
+    timestamp: log.block.timestamp,
+    to: ZERO_ADDRESS,
+    liquidity: ZERO_NUM,
+  });
+
+  await burn.save();
+
+  await updateOverallDayData(log);
+  await updatePoolDayData(log);
+  await updatePoolHourData(log);
+  await updateTokenDayData(token0, log);
+  await updateTokenDayData(token1, log);
+}
+
+export async function handleFees(log: FeesLog) {
+  const pool = await Pool.get(log.address);
+  assert(pool, '!Pool');
+
+  // Statistics
+  const statistics = await Statistics.get('1');
+
+  assert(statistics, '!Statistics');
+
+  let token0 = await Token.get(pool.token0Id);
+  let token1 = await Token.get(pool.token1Id);
+
+  assert(token0 && token1, '!Token0 || !Token1');
+
+  const params = log.args;
+
+  assert(params, '!Params');
+
+  token0 = await getTokenPrice(token0);
+  token1 = await getTokenPrice(token1);
+
+  const amount0 = divideByBase(params.amount0.toBigInt(), token0.decimals);
+  const amount1 = divideByBase(params.amount1.toBigInt(), token1.decimals);
+  const amountUSD = amount0 * token0.derivedUSD + amount1 * token1.derivedUSD;
+
+  pool.totalFees0 = pool.totalFees0 + amount0;
+  pool.totalFees1 = pool.totalFees1 + amount1;
+  pool.totalFeesUSD = pool.totalFeesUSD + amountUSD;
+  await pool.save();
+
+  statistics.totalFeesUSD = statistics.totalFeesUSD + amountUSD;
+  await statistics.save();
+}
+
+export async function handleV2Transfer(log: TransferLog) {
+  const poolId = log.address;
+  const pool = await Pool.get(poolId);
+
+  assert(pool, '!Pool');
+
+  const params = log.args;
+
+  assert(params, '!Params');
+
+  const value = divideByBase(params.value.toBigInt());
+  const hash = log.transactionHash;
+  let transaction = await Transaction.get(hash);
+
+  if (!transaction) {
+    transaction = Transaction.create({
+      id: hash,
+      block: BigInt(log.blockNumber),
+      timestamp: log.block.timestamp,
+      hash,
+    });
+    await transaction.save();
+  }
+
+  const isMint = params.from == ZERO_ADDRESS && params.to !== ONE_ADDRESS;
+  const isBurn = params.to == ZERO_ADDRESS;
+
+  if (isMint) {
+    pool.totalSupply = pool.totalSupply + value;
+    await pool.save();
+
+    const mintId = transaction.id + '-' + log.logIndex;
+    const mint = Mint.create({
+      id: mintId,
+      amount0: ZERO_NUM,
+      amount1: ZERO_NUM,
+      amountUSD: ZERO_NUM,
+      sender: ZERO_ADDRESS,
+      timestamp: log.block.timestamp,
+      transactionId: transaction.id,
+      poolId: pool.id,
+      to: params.to,
+      liquidity: value,
+    });
+
+    await mint.save();
+  }
+
+  if (params.to === pool.id) {
+    const burnId = transaction.id + '-' + log.logIndex;
+    const burn = Burn.create({
+      id: burnId,
+      transactionId: transaction.id,
+      poolId: pool.id,
+      liquidity: value,
+      timestamp: transaction.timestamp,
+      sender: params.from,
+      to: params.to,
+      needsComplete: true,
+    });
+    await burn.save();
+  }
+
+  if (isBurn && params.from === pool.id) {
+    pool.totalSupply = pool.totalSupply - value;
+    await pool.save();
+
+    const burnId = transaction.id + '-' + log.logIndex;
+    let burn = await Burn.get(burnId);
+    if (burn && burn.needsComplete) {
+      burn.liquidity = value;
+      burn.needsComplete = false;
+      await burn.save();
+    } else {
+      const burn = Burn.create({
+        id: burnId,
+        transactionId: transaction.id,
+        poolId: pool.id,
+        liquidity: value,
+        timestamp: transaction.timestamp,
+        sender: params.from,
+        to: params.to,
+        needsComplete: false,
+      });
+      await burn.save();
+    }
+  }
+
+  if (!isMint && params.from !== pool.id) {
+    const userAddress = params.from;
+    const balance = await getERC20Balance(pool.address, userAddress);
+    createLPPosition(log, userAddress, balance.toBigInt());
+  }
+
+  if (!isBurn && params.to !== pool.id) {
+    const userAddress = params.to;
+    const balance = await getERC20Balance(pool.address, userAddress);
+    createLPPosition(log, userAddress, balance.toBigInt());
+  }
 }

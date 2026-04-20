@@ -149,6 +149,13 @@ const project: EthereumProject = {
               topics: ['Fees(address,uint256,uint256)'],
             },
           },
+          {
+            handler: 'handleV2Transfer',
+            kind: EthereumHandlerKind.Event,
+            filter: {
+              topics: ['Transfer(address,address,uint256)'],
+            },
+          },
         ],
       },
     },

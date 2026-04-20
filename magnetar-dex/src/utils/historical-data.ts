@@ -206,7 +206,7 @@ export async function createLPPosition(
     });
   }
 
-  position.position += divideByBase(amount);
+  position.position = divideByBase(amount);
 
   await position.save();
   return position;
