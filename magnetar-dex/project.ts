@@ -19,7 +19,7 @@ const project: EthereumProject = {
   version: '0.0.1',
   name: 'ethereum-starter',
   description:
-    'This project can be use as a starting point for developing your new Ethereum SubQuery project',
+    'Magnetar Finance DEX subquery project',
   runner: {
     node: {
       name: '@subql/node-ethereum',
@@ -74,6 +74,68 @@ const project: EthereumProject = {
         ],
       },
     },
+    {
+      kind: EthereumDatasourceKind.Runtime,
+      startBlock: 10349865,
+      options: {
+        abi: 'v3-pool-factory',
+        address: '0xB15716c7404BceFaDbd211b04F10bCbD9F93f6Dc',
+      },
+      assets: new Map([
+        ['v3-pool-factory', { file: './abis/v3-pool-factory.abi.json' }],
+        ['erc20', { file: './abis/erc20.abi.json' }],
+      ]),
+      mapping: {
+        file: './dist/index.js',
+        handlers: [
+          {
+            handler: 'handleV3PoolCreated',
+            kind: EthereumHandlerKind.Event,
+            filter: {
+              topics: ['PoolCreated(address,address,int24,address)'],
+            },
+          },
+        ],
+      },
+    },
+    {
+      kind: EthereumDatasourceKind.Runtime,
+      startBlock: 10350091,
+      options: {
+        abi: 'nfpm',
+        address: '0x023af3a2f01982a07c80bde582e48b4b9b491034',
+      },
+      assets: new Map([
+        ['nfpm', { file: './abis/nfpm.abi.json' }],
+        ['erc20', { file: './abis/erc20.abi.json' }],
+      ]),
+      mapping: {
+        file: './dist/index.js',
+        handlers: [
+          {
+            handler: 'handleNFPMTransfer',
+            kind: EthereumHandlerKind.Event,
+            filter: {
+              topics: ['Transfer(address,address,uint256)'],
+            },
+          },
+          {
+            handler: 'handleIncreaseLiquidity',
+            kind: EthereumHandlerKind.Event,
+            filter: {
+              topics: ['IncreaseLiquidity(uint256,uint128,uint256,uint256)'],
+            },
+          },
+          {
+            handler: 'handleCecreaseLiquidity',
+            kind: EthereumHandlerKind.Event,
+            filter: {
+              topics: ['DecreaseLiquidity(uint256,uint128,uint256,uint256)'],
+            },
+          },
+        ],
+      },
+    },
   ],
   templates: [
     {
@@ -85,6 +147,7 @@ const project: EthereumProject = {
       assets: new Map([
         ['v2-pool', { file: './abis/v2-pool.abi.json' }],
         ['erc20', { file: './abis/erc20.abi.json' }],
+        ['oracle', { file: './abis/oracle.abi.json' }],
       ]),
       mapping: {
         file: './dist/index.js',
@@ -94,6 +157,65 @@ const project: EthereumProject = {
             kind: EthereumHandlerKind.Event,
             filter: {
               topics: ['Mint(address,uint256,uint256)'],
+            },
+          },
+          {
+            handler: 'handleV2Swap',
+            kind: EthereumHandlerKind.Event,
+            filter: {
+              topics: ['Swap(address,address,uint256,uint256,uint256,uint256)'],
+            },
+          },
+          {
+            handler: 'handleSync',
+            kind: EthereumHandlerKind.Event,
+            filter: {
+              topics: ['Sync(uint256,uint256)'],
+            },
+          },
+          {
+            handler: 'handleV2Burn',
+            kind: EthereumHandlerKind.Event,
+            filter: {
+              topics: ['Burn(address,address,uint256,uint256)'],
+            },
+          },
+          {
+            handler: 'handleFees',
+            kind: EthereumHandlerKind.Event,
+            filter: {
+              topics: ['Fees(address,uint256,uint256)'],
+            },
+          },
+          {
+            handler: 'handleV2Transfer',
+            kind: EthereumHandlerKind.Event,
+            filter: {
+              topics: ['Transfer(address,address,uint256)'],
+            },
+          },
+        ],
+      },
+    },
+    {
+      kind: EthereumDatasourceKind.Runtime,
+      name: 'V3Pool',
+      options: {
+        abi: 'v3-pool',
+      },
+      assets: new Map([
+        ['v3-pool', { file: './abis/v3-pool.abi.json' }],
+        ['erc20', { file: './abis/erc20.abi.json' }],
+        ['oracle', { file: './abis/oracle.abi.json' }],
+      ]),
+      mapping: {
+        file: './dist/index.js',
+        handlers: [
+          {
+            handler: 'handleV3Mint',
+            kind: EthereumHandlerKind.Event,
+            filter: {
+              topics: ['Mint(address,address,int24,int24,uint128,uint256,uint256)'],
             },
           },
         ],

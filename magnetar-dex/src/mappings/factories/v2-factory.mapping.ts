@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
-// Auto-generated
-
 import assert from 'assert';
-import { PoolCreatedLog } from '../types/abi-interfaces/V2PoolFactoryAbi';
-import { createV2PoolDatasource, Pool, PoolType, Statistics, Token } from '../types';
-import { getERC20Metadata } from '../utils';
-import { ONE_BI, ZERO_BI, ZERO_NUM } from '../constants';
+import { PoolCreatedLog } from '../../types/abi-interfaces/V2PoolFactoryAbi';
+import { createV2PoolDatasource, Pool, PoolType, Statistics, Token } from '../../types';
+import { getERC20Metadata } from '../../utils';
+import { ONE_BI, ZERO_BI, ZERO_NUM } from '../../constants';
 
 export async function handleV2PoolCreated(log: PoolCreatedLog): Promise<void> {
-  assert(log.args, 'No log.args');
+  assert(log.args, '!log.args');
   // Destructure args
   const { pool, token0, token1, stable } = log.args;
 
