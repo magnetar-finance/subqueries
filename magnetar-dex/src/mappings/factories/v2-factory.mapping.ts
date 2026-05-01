@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
 
-// Auto-generated
-
 import assert from 'assert';
 import { PoolCreatedLog } from '../../types/abi-interfaces/V2PoolFactoryAbi';
 import { createV2PoolDatasource, Pool, PoolType, Statistics, Token } from '../../types';

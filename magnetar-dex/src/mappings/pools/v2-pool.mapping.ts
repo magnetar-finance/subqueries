@@ -83,7 +83,7 @@ export async function handleV2Swap(log: SwapLog): Promise<void> {
     await transaction.save();
   }
 
-  const swapId = transaction.id + ':' + log.logIndex.toString();
+  const swapId = transaction.id + '-' + log.logIndex;
   const swap = Swap.create({
     id: swapId,
     transactionId: transaction.id,

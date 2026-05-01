@@ -19,7 +19,7 @@ const project: EthereumProject = {
   version: '0.0.1',
   name: 'ethereum-starter',
   description:
-    'This project can be use as a starting point for developing your new Ethereum SubQuery project',
+    'Magnetar Finance DEX subquery project',
   runner: {
     node: {
       name: '@subql/node-ethereum',
@@ -93,6 +93,44 @@ const project: EthereumProject = {
             kind: EthereumHandlerKind.Event,
             filter: {
               topics: ['PoolCreated(address,address,int24,address)'],
+            },
+          },
+        ],
+      },
+    },
+    {
+      kind: EthereumDatasourceKind.Runtime,
+      startBlock: 10350091,
+      options: {
+        abi: 'nfpm',
+        address: '0x023af3a2f01982a07c80bde582e48b4b9b491034',
+      },
+      assets: new Map([
+        ['nfpm', { file: './abis/nfpm.abi.json' }],
+        ['erc20', { file: './abis/erc20.abi.json' }],
+      ]),
+      mapping: {
+        file: './dist/index.js',
+        handlers: [
+          {
+            handler: 'handleNFPMTransfer',
+            kind: EthereumHandlerKind.Event,
+            filter: {
+              topics: ['Transfer(address,address,uint256)'],
+            },
+          },
+          {
+            handler: 'handleIncreaseLiquidity',
+            kind: EthereumHandlerKind.Event,
+            filter: {
+              topics: ['IncreaseLiquidity(uint256,uint128,uint256,uint256)'],
+            },
+          },
+          {
+            handler: 'handleCecreaseLiquidity',
+            kind: EthereumHandlerKind.Event,
+            filter: {
+              topics: ['DecreaseLiquidity(uint256,uint128,uint256,uint256)'],
             },
           },
         ],
