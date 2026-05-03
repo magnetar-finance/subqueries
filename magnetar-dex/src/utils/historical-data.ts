@@ -22,7 +22,7 @@ export async function updateOverallDayData(log: EthereumLog) {
   assert(statistics, '!Statistics');
 
   const timestamp = parseInt(log.block.timestamp.toString());
-  const dayID = timestamp / 86400;
+  const dayID = Math.floor(timestamp / 86400);
   const dayStartTimestamp = dayID * 86400;
 
   let overallDayData = await OverallDayData.get(dayID.toString());
@@ -31,7 +31,7 @@ export async function updateOverallDayData(log: EthereumLog) {
     overallDayData = OverallDayData.create({
       id: dayID.toString(),
       feesUSD: ZERO_NUM,
-      date: dayStartTimestamp,
+      date: BigInt(dayStartTimestamp),
       txCount: ZERO_BI,
       volumeETH: ZERO_NUM,
       volumeUSD: ZERO_NUM,
@@ -55,7 +55,7 @@ export async function updateOverallDayData(log: EthereumLog) {
 
 export async function updatePoolDayData(log: EthereumLog) {
   const timestamp = parseInt(log.block.timestamp.toString());
-  const dayID = timestamp / 86400;
+  const dayID = Math.floor(timestamp / 86400);
   const dayStartTimestamp = dayID * 86400;
   const dayPoolID = log.address.concat('-').concat(dayID.toString());
   const pool = await Pool.get(log.address);
@@ -67,7 +67,7 @@ export async function updatePoolDayData(log: EthereumLog) {
   if (!poolDayData) {
     poolDayData = PoolDayData.create({
       id: dayPoolID,
-      date: dayStartTimestamp,
+      date: BigInt(dayStartTimestamp),
       dailyTxns: ZERO_BI,
       dailyVolumeETH: ZERO_NUM,
       dailyVolumeToken0: ZERO_NUM,
@@ -96,7 +96,7 @@ export async function updatePoolDayData(log: EthereumLog) {
 
 export async function updatePoolHourData(log: EthereumLog) {
   const timestamp = parseInt(log.block.timestamp.toString());
-  const hourIndex = timestamp / 3600;
+  const hourIndex = Math.floor(timestamp / 3600);
   const hourStartUnix = hourIndex * 3600;
   const hourPoolID = log.address.concat('-').concat(hourIndex.toString());
   const pool = await Pool.get(log.address);
@@ -108,7 +108,7 @@ export async function updatePoolHourData(log: EthereumLog) {
   if (!poolHourData) {
     poolHourData = PoolHourData.create({
       id: hourPoolID,
-      hourStartUnix,
+      hourStartUnix: BigInt(hourStartUnix),
       poolId: pool.id,
       hourlyTxns: ZERO_BI,
       hourlyVolumeETH: ZERO_NUM,
@@ -136,7 +136,7 @@ export async function updatePoolHourData(log: EthereumLog) {
 
 export async function updateTokenDayData(token: Token, log: EthereumLog) {
   const timestamp = parseInt(log.block.timestamp.toString());
-  const dayID = timestamp / 86400;
+  const dayID = Math.floor(timestamp / 86400);
   const dayStartTimestamp = dayID * 86400;
   const tokenDayID = token.id.concat('-').concat(dayID.toString());
 
@@ -145,7 +145,7 @@ export async function updateTokenDayData(token: Token, log: EthereumLog) {
   if (!tokenDayData) {
     tokenDayData = TokenDayData.create({
       id: tokenDayID,
-      date: dayStartTimestamp,
+      date: BigInt(dayStartTimestamp),
       tokenId: token.id,
       dailyTxns: ZERO_BI,
       dailyVolumeETH: ZERO_NUM,

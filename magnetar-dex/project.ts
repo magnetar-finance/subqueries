@@ -18,8 +18,7 @@ const project: EthereumProject = {
   specVersion: '1.0.0',
   version: '0.0.1',
   name: 'ethereum-starter',
-  description:
-    'Magnetar Finance DEX subquery project',
+  description: 'Magnetar Finance DEX subquery project',
   runner: {
     node: {
       name: '@subql/node-ethereum',
@@ -76,7 +75,7 @@ const project: EthereumProject = {
     },
     {
       kind: EthereumDatasourceKind.Runtime,
-      startBlock: 10349865,
+      startBlock: 19733040,
       options: {
         abi: 'v3-pool-factory',
         address: '0xB15716c7404BceFaDbd211b04F10bCbD9F93f6Dc',
@@ -100,7 +99,7 @@ const project: EthereumProject = {
     },
     {
       kind: EthereumDatasourceKind.Runtime,
-      startBlock: 10350091,
+      startBlock: 19733040,
       options: {
         abi: 'nfpm',
         address: '0x023af3a2f01982a07c80bde582e48b4b9b491034',
@@ -127,7 +126,7 @@ const project: EthereumProject = {
             },
           },
           {
-            handler: 'handleCecreaseLiquidity',
+            handler: 'handleDecreaseLiquidity',
             kind: EthereumHandlerKind.Event,
             filter: {
               topics: ['DecreaseLiquidity(uint256,uint128,uint256,uint256)'],

@@ -6,7 +6,11 @@ import {
 } from '../../types/abi-interfaces/NfpmAbi';
 import { ZERO_ADDRESS, ZERO_NUM } from '../../constants';
 import { LiquidityPosition, User } from '../../types';
-import { divideByBase, getValueFromEphemeralHashMap } from '../../utils';
+import {
+  deleteFromEphemeralHashMap,
+  divideByBase,
+  getValueFromEphemeralHashMap,
+} from '../../utils';
 
 export async function handleNFPMTransfer(log: TransferLog) {
   const params = log.args;
@@ -32,11 +36,15 @@ export async function handleNFPMTransfer(log: TransferLog) {
   }
 
   if (isMint) {
-    const poolId = getValueFromEphemeralHashMap(log.transaction.hash);
+    const txHash = log.transaction.hash;
+    const poolId = getValueFromEphemeralHashMap(txHash);
     const lpId = `${user.id}-${poolId}`;
     const lp = await LiquidityPosition.get(lpId);
 
     assert(lp, '!LP');
+
+    // Remove from map
+    deleteFromEphemeralHashMap(txHash);
 
     lp.accountId = user.id;
     lp.clPositionTokenId = tokenId;

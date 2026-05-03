@@ -83,7 +83,7 @@ export async function handleV2Swap(log: SwapLog): Promise<void> {
     await transaction.save();
   }
 
-  const swapId = transaction.id + '-' + log.logIndex;
+  const swapId = `swap-${transaction.id}`;
   const swap = Swap.create({
     id: swapId,
     transactionId: transaction.id,
@@ -201,7 +201,7 @@ export async function handleV2Mint(log: MintLog) {
     await transaction.save();
   }
 
-  const mintId = transaction.id + '-' + log.logIndex;
+  const mintId = `mint-${transaction.id}`;
   const mint = await Mint.get(mintId);
   assert(mint, '!Mint');
 
@@ -297,7 +297,10 @@ export async function handleSync(log: SyncLog) {
   token1.totalLiquidityETH = token1.totalLiquidity * token1.derivedETH;
   token1.totalLiquidityUSD = token1.totalLiquidity * token1.derivedUSD;
 
-  await Promise.all([pool.save(), statistics.save(), token0.save(), token1.save()]);
+  await pool.save(); 
+  await statistics.save(); 
+  await token0.save(); 
+  await token1.save();
 }
 
 export async function handleV2Burn(log: BurnLog) {
@@ -324,7 +327,10 @@ export async function handleV2Burn(log: BurnLog) {
   statistics.txCount = statistics.txCount + ONE_BI;
   pool.txCount = pool.txCount + ONE_BI;
 
-  await Promise.all([token0.save(), token1.save(), statistics.save(), pool.save()]);
+  await token0.save();
+  await token1.save();
+  await statistics.save();
+  await pool.save();
 
   // Transaction
   const hash = log.transactionHash;
@@ -340,7 +346,7 @@ export async function handleV2Burn(log: BurnLog) {
     await transaction.save();
   }
 
-  const burnId = transaction.id + '-' + log.logIndex;
+  const burnId = `burn-${transaction.id}`;
   const burn = Burn.create({
     id: burnId,
     logIndex: log.logIndex,
@@ -430,7 +436,7 @@ export async function handleV2Transfer(log: TransferLog) {
     pool.totalSupply = pool.totalSupply + value;
     await pool.save();
 
-    const mintId = transaction.id + '-' + log.logIndex;
+    const mintId = `mint-${transaction.id}`;
     const mint = Mint.create({
       id: mintId,
       amount0: ZERO_NUM,
@@ -448,7 +454,7 @@ export async function handleV2Transfer(log: TransferLog) {
   }
 
   if (params.to === pool.id) {
-    const burnId = transaction.id + '-' + log.logIndex;
+    const burnId = `burn-${transaction.id}`;
     const burn = Burn.create({
       id: burnId,
       transactionId: transaction.id,
@@ -466,7 +472,7 @@ export async function handleV2Transfer(log: TransferLog) {
     pool.totalSupply = pool.totalSupply - value;
     await pool.save();
 
-    const burnId = transaction.id + '-' + log.logIndex;
+    const burnId = `burn-${transaction.id}`;
     let burn = await Burn.get(burnId);
     if (burn && burn.needsComplete) {
       burn.liquidity = value;

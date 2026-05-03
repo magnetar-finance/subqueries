@@ -8,3 +8,7 @@ export function updateEphemeralHashmap(id: string, value: string) {
 export function getValueFromEphemeralHashMap(id: string) {
   return ephemeralHashmap.get(id) || '';
 }
+
+export function deleteFromEphemeralHashMap(id: string) {
+  return ephemeralHashmap.delete(id);
+}

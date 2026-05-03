@@ -100,7 +100,7 @@ export async function handleV3Swap(log: SwapLog): Promise<void> {
     await transaction.save();
   }
 
-  const swapId = transaction.id + '-' + log.logIndex;
+  const swapId = `swap-${transaction.id}`;
   const swap = Swap.create({
     id: swapId,
     transactionId: transaction.id,
@@ -231,7 +231,7 @@ export async function handleV3Mint(log: MintLog): Promise<void> {
     await transaction.save();
   }
 
-  const mintId = transaction.id + '-' + log.logIndex;
+  const mintId = `mint-${transaction.id}`;
   const mint = Mint.create({
     id: mintId,
     amount0,
@@ -335,7 +335,7 @@ export async function handleV3Burn(log: BurnLog): Promise<void> {
     await transaction.save();
   }
 
-  const burnId = transaction.id + '-' + log.logIndex;
+  const burnId = `burn-${transaction.id}`;
   const burn = Burn.create({
     id: burnId,
     transactionId: transaction.id,
