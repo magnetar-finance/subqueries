@@ -21,8 +21,3 @@ export async function getTokenPrice(token: Token) {
   await token.save();
   return token;
 }
-
-export async function getBundlePrice() {
-  const oracleId = ORACLES[chainId];
-  const oracle = OracleAbi__factory.connect(oracleId, api);
-}

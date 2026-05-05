@@ -213,7 +213,7 @@ type Bundle @entity {
 
 type OverallDayData @entity {
   id: ID!
-  date: Int! @index
+  date: BigInt! @index
   volumeETH: Float!
   volumeUSD: Float!
   liquidityETH: Float!
@@ -226,7 +226,7 @@ type OverallDayData @entity {
 
 type PoolHourData @entity {
   id: ID!
-  hourStartUnix: Int!
+  hourStartUnix: BigInt!
   pool: Pool! @index
   reserve0: Float!
   reserve1: Float!
@@ -242,7 +242,7 @@ type PoolHourData @entity {
 
 type PoolDayData @entity {
   id: ID!
-  date: Int!
+  date: BigInt!
   pool: Pool! @index
   reserve0: Float!
   reserve1: Float!
@@ -258,7 +258,7 @@ type PoolDayData @entity {
 
 type TokenDayData @entity {
   id: ID!
-  date: Int!
+  date: BigInt!
   token: Token! @index
   dailyVolumeToken: Float!
   dailyVolumeETH: Float!
@@ -276,11 +276,6 @@ type LiquidityManager @entity {
   address: String! @index
   name: String!
   provider: LPManagementProvider! @index
-  pool: Pool! @index
-}
-
-type CLPosition @entity {
-  id: ID!
   pool: Pool! @index
 }
 
