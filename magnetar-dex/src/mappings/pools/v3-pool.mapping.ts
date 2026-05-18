@@ -96,6 +96,7 @@ export async function handleV3Swap(log: SwapLog): Promise<void> {
       block: BigInt(log.blockNumber),
       timestamp: log.block.timestamp,
       hash,
+      chainId,
     });
     await transaction.save();
   }
@@ -119,7 +120,7 @@ export async function handleV3Swap(log: SwapLog): Promise<void> {
   await swap.save();
 
   // Statistics
-  const statistics = await Statistics.get('1');
+  const statistics = await Statistics.get(`1-${chainId}`);
 
   assert(statistics, '!Statistics');
 
@@ -165,7 +166,7 @@ export async function handleV3Swap(log: SwapLog): Promise<void> {
 export async function handleV3Mint(log: MintLog): Promise<void> {
   const poolId = log.address;
   const pool = await Pool.get(poolId);
-  const statistics = await Statistics.get('1');
+  const statistics = await Statistics.get(`1-${chainId}`);
 
   assert(pool, '!Pool');
   assert(statistics, '!Stats');
@@ -227,6 +228,7 @@ export async function handleV3Mint(log: MintLog): Promise<void> {
       block: BigInt(log.blockNumber),
       timestamp: log.block.timestamp,
       hash,
+      chainId,
     });
     await transaction.save();
   }
@@ -243,6 +245,7 @@ export async function handleV3Mint(log: MintLog): Promise<void> {
     poolId: pool.id,
     to: params.owner,
     liquidity,
+    chainId,
   });
 
   await mint.save();
@@ -256,7 +259,7 @@ export async function handleV3Mint(log: MintLog): Promise<void> {
 export async function handleV3Burn(log: BurnLog): Promise<void> {
   const poolId = log.address;
   const pool = await Pool.get(poolId);
-  const statistics = await Statistics.get('1');
+  const statistics = await Statistics.get(`1-${chainId}`);
 
   assert(pool, '!Pool');
   assert(statistics, '!Stats');
@@ -331,6 +334,7 @@ export async function handleV3Burn(log: BurnLog): Promise<void> {
       block: BigInt(log.blockNumber),
       timestamp: log.block.timestamp,
       hash,
+      chainId,
     });
     await transaction.save();
   }

@@ -31,6 +31,7 @@ export async function handleV3PoolCreated(log: PoolCreatedLog): Promise<void> {
       totalLiquidityUSD: ZERO_NUM,
       derivedETH: ZERO_NUM,
       derivedUSD: ZERO_NUM,
+      chainId,
     });
 
     await token0Entity.save();
@@ -53,6 +54,7 @@ export async function handleV3PoolCreated(log: PoolCreatedLog): Promise<void> {
       totalLiquidityUSD: ZERO_NUM,
       derivedETH: ZERO_NUM,
       derivedUSD: ZERO_NUM,
+      chainId,
     });
 
     await token1Entity.save();
@@ -92,12 +94,13 @@ export async function handleV3PoolCreated(log: PoolCreatedLog): Promise<void> {
     totalEmissions: ZERO_NUM,
     totalEmissionsUSD: ZERO_NUM,
     tickSpacing,
+    chainId,
   });
 
   await poolEntity.save();
 
   // Statistics
-  const statsId = '1';
+  const statsId = '1-' + chainId;
   let statistics = await Statistics.get(statsId);
 
   if (!statistics) {

@@ -31,6 +31,7 @@ export async function handleV2PoolCreated(log: PoolCreatedLog): Promise<void> {
       totalLiquidityUSD: ZERO_NUM,
       derivedETH: ZERO_NUM,
       derivedUSD: ZERO_NUM,
+      chainId,
     });
 
     await token0Entity.save();
@@ -53,6 +54,7 @@ export async function handleV2PoolCreated(log: PoolCreatedLog): Promise<void> {
       totalLiquidityUSD: ZERO_NUM,
       derivedETH: ZERO_NUM,
       derivedUSD: ZERO_NUM,
+      chainId,
     });
 
     await token1Entity.save();
@@ -91,12 +93,13 @@ export async function handleV2PoolCreated(log: PoolCreatedLog): Promise<void> {
     gaugeFees1CurrentEpoch: ZERO_NUM,
     totalEmissions: ZERO_NUM,
     totalEmissionsUSD: ZERO_NUM,
+    chainId,
   });
 
   await poolEntity.save();
 
   // Statistics
-  const statsId = '1';
+  const statsId = '1-' + chainId;
   let statistics = await Statistics.get(statsId);
 
   if (!statistics) {

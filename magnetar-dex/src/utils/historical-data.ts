@@ -17,7 +17,7 @@ import { ONE_BI, ZERO_BI, ZERO_NUM } from '../constants';
 import { divideByBase } from './units';
 
 export async function updateOverallDayData(log: EthereumLog) {
-  const statistics = await Statistics.get('1');
+  const statistics = await Statistics.get(`1-${chainId}`);
 
   assert(statistics, '!Statistics');
 
@@ -39,6 +39,7 @@ export async function updateOverallDayData(log: EthereumLog) {
       liquidityUSD: ZERO_NUM,
       totalTradeVolumeETH: ZERO_NUM,
       totalTradeVolumeUSD: ZERO_NUM,
+      chainId,
     });
   }
 

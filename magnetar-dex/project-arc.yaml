@@ -1,0 +1,150 @@
+specVersion: 1.0.0
+version: 0.0.1
+name: ethereum-starter
+description: Magnetar Finance DEX subquery project
+runner:
+  node:
+    name: '@subql/node-ethereum'
+    version: '>=3.0.0'
+  query:
+    name: '@subql/query'
+    version: '*'
+schema:
+  file: ./schema.graphql
+network:
+  chainId: '5042002'
+  endpoint:
+    - https://rpc.testnet.arc.network
+    - https://rpc.blockdaemon.testnet.arc.network
+    - https://rpc.drpc.testnet.arc.network
+    - https://rpc.quicknode.testnet.arc.network
+dataSources:
+  - kind: ethereum/Runtime
+    startBlock: 19733040
+    options:
+      abi: v2-pool-factory
+      address: '0xE41d241720FEE7cD6BDfA9aB3204d23687703CD5'
+    assets:
+      v2-pool-factory:
+        file: ./abis/v2-pool-factory.abi.json
+      erc20:
+        file: ./abis/erc20.abi.json
+    mapping:
+      file: ./dist/index.js
+      handlers:
+        - handler: handleV2PoolCreated
+          kind: ethereum/LogHandler
+          filter:
+            topics:
+              - PoolCreated(address,address,bool,address,uint256)
+  - kind: ethereum/Runtime
+    startBlock: 19733040
+    options:
+      abi: v3-pool-factory
+      address: '0xf6a6a429a0b9676293Df0E3616A6a33cA673b5C3'
+    assets:
+      v3-pool-factory:
+        file: ./abis/v3-pool-factory.abi.json
+      erc20:
+        file: ./abis/erc20.abi.json
+    mapping:
+      file: ./dist/index.js
+      handlers:
+        - handler: handleV3PoolCreated
+          kind: ethereum/LogHandler
+          filter:
+            topics:
+              - PoolCreated(address,address,int24,address)
+  - kind: ethereum/Runtime
+    startBlock: 19733040
+    options:
+      abi: nfpm
+      address: '0x8948f9d59203F9dCF4de4B2baa10887993274C3C'
+    assets:
+      nfpm:
+        file: ./abis/nfpm.abi.json
+      erc20:
+        file: ./abis/erc20.abi.json
+    mapping:
+      file: ./dist/index.js
+      handlers:
+        - handler: handleNFPMTransfer
+          kind: ethereum/LogHandler
+          filter:
+            topics:
+              - Transfer(address,address,uint256)
+        - handler: handleIncreaseLiquidity
+          kind: ethereum/LogHandler
+          filter:
+            topics:
+              - IncreaseLiquidity(uint256,uint128,uint256,uint256)
+        - handler: handleDecreaseLiquidity
+          kind: ethereum/LogHandler
+          filter:
+            topics:
+              - DecreaseLiquidity(uint256,uint128,uint256,uint256)
+templates:
+  - kind: ethereum/Runtime
+    name: V2Pool
+    options:
+      abi: v2-pool
+    assets:
+      v2-pool:
+        file: ./abis/v2-pool.abi.json
+      erc20:
+        file: ./abis/erc20.abi.json
+      oracle:
+        file: ./abis/oracle.abi.json
+    mapping:
+      file: ./dist/index.js
+      handlers:
+        - handler: handleV2Mint
+          kind: ethereum/LogHandler
+          filter:
+            topics:
+              - Mint(address,uint256,uint256)
+        - handler: handleV2Swap
+          kind: ethereum/LogHandler
+          filter:
+            topics:
+              - Swap(address,address,uint256,uint256,uint256,uint256)
+        - handler: handleSync
+          kind: ethereum/LogHandler
+          filter:
+            topics:
+              - Sync(uint256,uint256)
+        - handler: handleV2Burn
+          kind: ethereum/LogHandler
+          filter:
+            topics:
+              - Burn(address,address,uint256,uint256)
+        - handler: handleFees
+          kind: ethereum/LogHandler
+          filter:
+            topics:
+              - Fees(address,uint256,uint256)
+        - handler: handleV2Transfer
+          kind: ethereum/LogHandler
+          filter:
+            topics:
+              - Transfer(address,address,uint256)
+  - kind: ethereum/Runtime
+    name: V3Pool
+    options:
+      abi: v3-pool
+    assets:
+      v3-pool:
+        file: ./abis/v3-pool.abi.json
+      erc20:
+        file: ./abis/erc20.abi.json
+      oracle:
+        file: ./abis/oracle.abi.json
+    mapping:
+      file: ./dist/index.js
+      handlers:
+        - handler: handleV3Mint
+          kind: ethereum/LogHandler
+          filter:
+            topics:
+              - Mint(address,address,int24,int24,uint128,uint256,uint256)
+repository: https://github.com/subquery/ethereum-subql-starter
