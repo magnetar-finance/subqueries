@@ -79,6 +79,7 @@ export async function handleV2Swap(log: SwapLog): Promise<void> {
       block: BigInt(log.blockNumber),
       timestamp: log.block.timestamp,
       hash,
+      chainId,
     });
     await transaction.save();
   }
@@ -102,7 +103,7 @@ export async function handleV2Swap(log: SwapLog): Promise<void> {
   await swap.save();
 
   // Statistics
-  const statistics = await Statistics.get('1');
+  const statistics = await Statistics.get(`1-${chainId}`);
 
   assert(statistics, '!Statistics');
 
@@ -177,7 +178,7 @@ export async function handleV2Mint(log: MintLog) {
   await token1.save();
 
   // Statistics
-  const statistics = await Statistics.get('1');
+  const statistics = await Statistics.get(`1-${chainId}`);
 
   assert(statistics, '!Statistics');
 
@@ -197,6 +198,7 @@ export async function handleV2Mint(log: MintLog) {
       block: BigInt(log.blockNumber),
       timestamp: log.block.timestamp,
       hash,
+      chainId,
     });
     await transaction.save();
   }
@@ -252,7 +254,7 @@ export async function handleSync(log: SyncLog) {
   assert(pool, '!Pool');
 
   // Statistics
-  const statistics = await Statistics.get('1');
+  const statistics = await Statistics.get(`1-${chainId}`);
 
   assert(statistics, '!Statistics');
 
@@ -297,9 +299,9 @@ export async function handleSync(log: SyncLog) {
   token1.totalLiquidityETH = token1.totalLiquidity * token1.derivedETH;
   token1.totalLiquidityUSD = token1.totalLiquidity * token1.derivedUSD;
 
-  await pool.save(); 
-  await statistics.save(); 
-  await token0.save(); 
+  await pool.save();
+  await statistics.save();
+  await token0.save();
   await token1.save();
 }
 
@@ -309,7 +311,7 @@ export async function handleV2Burn(log: BurnLog) {
 
   const token0 = await Token.get(pool.token0Id);
   const token1 = await Token.get(pool.token1Id);
-  const statistics = await Statistics.get('1');
+  const statistics = await Statistics.get(`1-${chainId}`);
 
   assert(token0 && token1 && statistics, '!Token0 || !Token1 || !Statistics');
 
@@ -342,6 +344,7 @@ export async function handleV2Burn(log: BurnLog) {
       block: BigInt(log.blockNumber),
       timestamp: log.block.timestamp,
       hash,
+      chainId,
     });
     await transaction.save();
   }
@@ -376,7 +379,7 @@ export async function handleFees(log: FeesLog) {
   assert(pool, '!Pool');
 
   // Statistics
-  const statistics = await Statistics.get('1');
+  const statistics = await Statistics.get(`1-${chainId}`);
 
   assert(statistics, '!Statistics');
 
@@ -425,6 +428,7 @@ export async function handleV2Transfer(log: TransferLog) {
       block: BigInt(log.blockNumber),
       timestamp: log.block.timestamp,
       hash,
+      chainId,
     });
     await transaction.save();
   }
@@ -448,6 +452,7 @@ export async function handleV2Transfer(log: TransferLog) {
       poolId: pool.id,
       to: params.to,
       liquidity: value,
+      chainId,
     });
 
     await mint.save();

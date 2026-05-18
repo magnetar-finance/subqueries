@@ -1,4 +1,4 @@
-version: "3"
+version: '3'
 
 services:
   postgres:
@@ -12,7 +12,7 @@ services:
     environment:
       POSTGRES_PASSWORD: postgres
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 5s
       timeout: 5s
       retries: 5
@@ -20,7 +20,7 @@ services:
   subquery-node:
     image: subquerynetwork/subql-node-ethereum:latest
     depends_on:
-      "postgres":
+      'postgres':
         condition: service_healthy
     restart: unless-stopped
     environment:
@@ -39,7 +39,7 @@ services:
       - --batch-size=5000
       - --unfinalized-blocks=true
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://subquery-node:3000/ready"]
+      test: ['CMD', 'wget', '--spider', '-q', 'http://subquery-node:3000/ready']
       interval: 3s
       timeout: 5s
       retries: 10
@@ -49,9 +49,9 @@ services:
     ports:
       - 43000:3000
     depends_on:
-      "postgres":
+      'postgres':
         condition: service_healthy
-      "subquery-node":
+      'subquery-node':
         condition: service_healthy
     restart: always
     environment:
@@ -64,3 +64,29 @@ services:
       - --name=app
       - --playground
       - --indexer=http://subquery-node:3000
+  subquery-node-project-arc:
+    image: subquerynetwork/subql-node-ethereum:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: always
+    environment:
+      DB_USER: postgres
+      DB_PASS: postgres
+      DB_DATABASE: postgres
+      DB_HOST: postgres
+      DB_PORT: '5432'
+    volumes:
+      - ./:/app
+    command:
+      - -f=app/project-arc.yaml
+      - --multi-chain
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - -f
+        - http://subquery-node-project-arc:3000/ready
+      interval: 3s
+      timeout: 5s
+      retries: 10

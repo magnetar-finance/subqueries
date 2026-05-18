@@ -70,6 +70,7 @@ type Pool @entity {
   gauge: Gauge @index
   liquidityManager: [LiquidityManager!]! @derivedFrom(field: "pool")
   tickSpacing: Int
+  chainId: String!
 }
 
 type User @entity {
@@ -93,6 +94,7 @@ type Gauge @entity {
   fees1: Float!
   isAlive: Boolean!
   emission: Float!
+  chainId: String!
 }
 
 type GaugePosition @entity {
@@ -127,6 +129,7 @@ type LockPosition @entity {
   freeRewardManager: String @index
   unlockTime: BigInt!
   totalVoteWeightGiven: Float!
+  chainId: String!
 }
 
 type Token @entity {
@@ -145,6 +148,7 @@ type Token @entity {
   derivedUSD: Float!
   basePools: [Pool!]! @derivedFrom(field: "token0")
   quotePools: [Pool!]! @derivedFrom(field: "token1")
+  chainId: String!
 }
 
 type Transaction @entity {
@@ -155,6 +159,7 @@ type Transaction @entity {
   mints: [Mint!]! @derivedFrom(field: "transaction")
   burns: [Burn!]! @derivedFrom(field: "transaction")
   swaps: [Swap!]! @derivedFrom(field: "transaction")
+  chainId: String!
 }
 
 type Mint @entity {
@@ -171,6 +176,7 @@ type Mint @entity {
   amountUSD: Float
   feeTo: String
   feeLiquidity: Float
+  chainId: String!
 }
 
 type Burn @entity {
@@ -222,6 +228,7 @@ type OverallDayData @entity {
   feesUSD: Float!
   totalTradeVolumeETH: Float!
   totalTradeVolumeUSD: Float!
+  chainId: String!
 }
 
 type PoolHourData @entity {
@@ -277,6 +284,7 @@ type LiquidityManager @entity {
   name: String!
   provider: LPManagementProvider! @index
   pool: Pool! @index
+  chainId: String!
 }
 
 type VotingRewards @entity {
